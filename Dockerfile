@@ -24,7 +24,6 @@ RUN wget -qq "https://launchpad.net/~bitcoin/+archive/ubuntu/bitcoin/+files/libd
 WORKDIR /opt
 
 COPY bitcoin-${BITCOIN_MAJOR_VER}.${BITCOIN_VERSION_PATCH}.knots${KNOTS_BUILD}/ ./
-RUN echo "Listing files:" && ls
 
 COPY docker-entrypoint.sh /entrypoint.sh
 
