@@ -2,20 +2,30 @@ FROM debian:trixie-slim
 
 LABEL maintainer.0="dr0ther" 
 
+ENV BITCOIN_VERSION_PATCH=1
+ENV BITCOIN_MAJOR_VER=28
+ENV BITCOIN_DATA=/home/bitcoin/.bitcoin
+ENV KNOTS_BUILD=20250305
+ENV PATH=/opt/bitcoin-${BITCOIN_MAJOR_VER}.${BITCOIN_VERSION_PATCH}.knots${KNOTS_BUILD}/bin:$PATH
+
 RUN useradd -r bitcoin \
   && apt-get update -y \
-  && apt-get install -y curl gnupg gosu libminiupnpc18 libevent-dev libzmq3-dev \
+  && apt-get install -y wget gnupg gosu libminiupnpc18 libevent-dev libzmq3-dev \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
+WORKDIR /tmp/tmplibdb
+RUN wget -qq "https://launchpad.net/~bitcoin/+archive/ubuntu/bitcoin/+files/libdb4.8_4.8.30-trusty1_amd64.deb" \
+  && wget -qq "https://launchpad.net/~bitcoin/+archive/ubuntu/bitcoin/+files/libdb4.8-dev_4.8.30-trusty1_amd64.deb" \
+  && wget -qq "https://launchpad.net/~bitcoin/+archive/ubuntu/bitcoin/+files/libdb4.8++_4.8.30-trusty1_amd64.deb" \
+  && wget -qq "https://launchpad.net/~bitcoin/+archive/ubuntu/bitcoin/+files/libdb4.8++-dev_4.8.30-trusty1_amd64.deb" \
+  && dpkg -i *.deb
 
 WORKDIR /opt
 
-RUN curl -o /tmp/btc.tar.gz https://web.wadehomelab.com/knots-gm.tar.gz \
-  && tar -xzf /tmp/btc.tar.gz -C /opt \
-  && rm /tmp/btc.tar.gz \
+COPY bitcoin-${BITCOIN_MAJOR_VER}.${BITCOIN_VERSION_PATCH}.knots${KNOTS_BUILD}/ ./
+RUN echo "Listing files:" && ls
 
-./install_libdb48.sh amd64
 COPY docker-entrypoint.sh /entrypoint.sh
 
 VOLUME ["/home/bitcoin/.bitcoin"]
